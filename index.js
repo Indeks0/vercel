@@ -35,7 +35,7 @@ app.get("/latest-reading", async (req, res) => {
             `SELECT id, temperature, humidity, pressure, light, particles, datecreated
             FROM public.reading order by datecreated desc limit 1`
         );
-        res.json({"ssss": 2});
+        res.json( newReading );
     } catch (error) {
         console.log(error);
     }
