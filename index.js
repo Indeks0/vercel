@@ -31,15 +31,11 @@ app.get("/latest-reading", async (req, res) => {
         res.setHeader("Content-Type", "application/json");
         res.setHeader("Cache-Control", "s-max-age=1, stale-while-revalidate");
 
-        const { temperature, humidity, pressure, light, particles } = req.body;
-        let data = [];
-        data.push(temperature, humidity, pressure, light, particles);
-
         const newReading = await pool.query(
             `SELECT id, temperature, humidity, pressure, light, particles, datecreated
             FROM public.reading order by datecreated desc limit 1`
         );
-        return res.json(newReading.rows);
+        res.json(newReading.rows);
     } catch (error) {
         console.log(error);
     }
@@ -48,5 +44,5 @@ app.get("/latest-reading", async (req, res) => {
 // get latest
 
 app.listen(process.env.PORT || 9000, () => {
-    console.log("server is listening on port 8080");
+    console.log(`server is listening on port ${process.env.PORT || 9000}`);
 });
