@@ -9,26 +9,12 @@ app.use(express.json()); // req => body
 // post
 app.post("/reading", async (req, res) => {
     try {
-        const {
-            temperature,
-            humidity,
-            pressure,
-            light,
-            particles,
-            datecreated,
-        } = req.body;
+        const { temperature, humidity, pressure, light, particles } = req.body;
 
-        var data = []
-        data.push(
-            temperature,
-            humidity,
-            pressure,
-            light,
-            particles,
-            datecreated
-        );
+        let data = [];
+        data.push(temperature, humidity, pressure, light, particles);
         const newReading = await pool.query(
-            "INSERT INTO public.reading (temperature, humidity, pressure, light, particles, datecreated) VALUES($0, $1, $2, $3, $4, $5) RETURNING *",
+            "INSERT INTO public.reading (temperature, humidity, pressure, light, particles) VALUES($1, $2, $3, $4, $5) RETURNING *",
             data
         );
         res.json(newReading.rows);
