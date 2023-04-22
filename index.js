@@ -11,8 +11,11 @@ app.post("/reading", async (req, res) => {
     try {
         const { temperature, humidity, pressure, light, particles } = req.body;
 
-        let data = [];
-        data.push(temperature, humidity, pressure, light, particles);
+          res.setHeader("Content-Type", "text/html");
+          res.setHeader("Cache-Control", "s-max-age=1, stale-while-revalidate");
+          let data = [];
+          data.push(temperature, humidity, pressure, light, particles);
+          console.log(data);
         const newReading = await pool.query(
             `INSERT INTO "reading" ("temperature", "humidity", "pressure", "light", "particles") VALUES($1, $2, $3, $4, $5)`,
             data
