@@ -14,7 +14,7 @@ app.post("/reading", async (req, res) => {
         let data = [];
         data.push(temperature, humidity, pressure, light, particles);
         const newReading = await pool.query(
-            "INSERT INTO public.reading (temperature, humidity, pressure, light, particles) VALUES($1, $2, $3, $4, $5) RETURNING *",
+            `INSERT INTO "reading" ("temperature", "humidity", "pressure", "light", "particles") VALUES($1, $2, $3, $4, $5)`,
             data
         );
         res.json(newReading.rows);

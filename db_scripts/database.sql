@@ -7,5 +7,5 @@ CREATE TABLE reading(
     pressure FLOAT,
     light FLOAT,
     particles FLOAT,
-    datecreated TIMESTAMP
+    datecreated TIMESTAMP DEFAULT NOW()
 )
