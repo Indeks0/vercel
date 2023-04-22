@@ -33,6 +33,6 @@ app.post("/reading", async (req, res) => {
 
 // get latest
 
-app.listen(8080, () => {
+app.listen(process.env.PORT || 9000, () => {
     console.log("server is listening on port 8080");
 });
