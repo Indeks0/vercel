@@ -1,12 +1,11 @@
 const express = require("express");
 const app = express();
 const pool = require("./db");
+var cors = require("cors");
 
-app.use(express.json()); // req => body
+app.use(express.json());
+app.use(cors());
 
-// ----------------routes
-
-// post
 app.post("/reading", async (req, res) => {
     try {
         res.setHeader("Content-Type", "application/json");
@@ -35,7 +34,7 @@ app.get("/latest-reading", async (req, res) => {
             `SELECT id, temperature, humidity, pressure, light, particles, datecreated
             FROM public.reading order by datecreated desc limit 1`
         );
-        res.json( newReading );
+        res.json(newReading.rows);
     } catch (error) {
         console.log(error);
     }
