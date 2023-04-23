@@ -40,6 +40,39 @@ app.get("/latest-reading", async (req, res) => {
     }
 });
 
+app.get("/find-reading", async (req, res) => {
+    try {
+        const { page, rpp, sortOrder, dateLowerLimit, dateUpperLimit } =
+            req.body;
+
+        res.setHeader("Content-Type", "application/json");
+        res.setHeader("Cache-Control", "s-max-age=1, stale-while-revalidate");
+
+        let orderQuery = sortOrder === "DESC" ? "descending" : "ascending";
+        let offsetQuery = page * rpp;
+
+        let dateQuery = null;
+
+        if (dateLowerLimit && dateUpperLimit) {
+            dateQuery = `datecreated > ${dateLowerLimit} AND datecreated < ${dateUpperLimit} `;
+        } else if (dateLowerLimit) {
+            dateQuery = `datecreated > ${dateLowerLimit} `;
+        } else if (dateUpperLimit) {
+            dateQuery = `datecreated < ${dateUpperLimit} `;
+        }
+
+        const newReading = await pool.query(
+            `SELECT *
+            FROM public.reading ${
+                dateQuery && "Where " + dateQuery
+            } orderby datecreated ${orderQuery} LIMIT ${rpp} OFFSET ${offsetQuery}`
+        );
+        res.json(newReading.rows);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
 // get latest
 
 app.listen(process.env.PORT || 9000, () => {
