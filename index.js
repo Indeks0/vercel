@@ -43,7 +43,7 @@ app.get("/latest-reading", async (req, res) => {
 app.get("/find-reading", async (req, res) => {
     try {
         const { page, rpp, sortOrder, dateLowerLimit, dateUpperLimit } =
-            req.body;
+            req.query;
 
         res.setHeader("Content-Type", "application/json");
         res.setHeader("Cache-Control", "s-max-age=1, stale-while-revalidate");
