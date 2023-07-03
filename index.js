@@ -34,7 +34,7 @@ app.post("/reading", async (req, res) => {
         );
 
         const newReading = await pool.query(
-            `INSERT INTO "reading" ("temperature", "humidity", "pressure", "light", "particles", "windSpeed", "rain", "windDirection") VALUES($1, $2, $3, $4, $5, $6, $7, $8)`,
+            `INSERT INTO "reading" ("temperature", "humidity", "pressure", "light", "particles", "windspeed", "rain", "winddirection") VALUES($1, $2, $3, $4, $5, $6, $7, $8)`,
             data
         );
         return res.json(newReading.rows);
@@ -49,7 +49,7 @@ app.get("/latest-reading", async (req, res) => {
         res.setHeader("Cache-Control", "s-max-age=1, stale-while-revalidate");
 
         const newReading = await pool.query(
-            `SELECT id, temperature, humidity, pressure, light, particles, windSpeed, rain, windDirection, datecreated
+            `SELECT id, temperature, humidity, pressure, light, particles, windspeed, rain, winddirection, datecreated
             FROM public.reading order by datecreated desc limit 1`
         );
         res.json(newReading.rows);
