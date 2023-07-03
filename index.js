@@ -11,12 +11,30 @@ app.post("/reading", async (req, res) => {
         res.setHeader("Content-Type", "application/json");
         res.setHeader("Cache-Control", "s-max-age=1, stale-while-revalidate");
 
-        const { temperature, humidity, pressure, light, particles } = req.body;
+        const {
+            temperature,
+            humidity,
+            pressure,
+            light,
+            particles,
+            windSpeed,
+            windDirection,
+            rain,
+        } = req.body;
         let data = [];
-        data.push(temperature, humidity, pressure, light, particles);
+        data.push(
+            temperature.toFixed(2),
+            humidity.toFixed(2),
+            pressure.toFixed(2),
+            light.toFixed(2),
+            particles.toFixed(2),
+            windSpeed.toFixed(2),
+            rain.toFixed(2),
+            windDirection
+        );
 
         const newReading = await pool.query(
-            `INSERT INTO "reading" ("temperature", "humidity", "pressure", "light", "particles") VALUES($1, $2, $3, $4, $5)`,
+            `INSERT INTO "reading" ("temperature", "humidity", "pressure", "light", "particles", "windSpeed", "rain", "windDirection") VALUES($1, $2, $3, $4, $5, $6, $7, $8)`,
             data
         );
         return res.json(newReading.rows);
@@ -31,7 +49,7 @@ app.get("/latest-reading", async (req, res) => {
         res.setHeader("Cache-Control", "s-max-age=1, stale-while-revalidate");
 
         const newReading = await pool.query(
-            `SELECT id, temperature, humidity, pressure, light, particles, datecreated
+            `SELECT id, temperature, humidity, pressure, light, particles, windSpeed, rain, windDirection, datecreated
             FROM public.reading order by datecreated desc limit 1`
         );
         res.json(newReading.rows);
@@ -48,26 +66,31 @@ app.get("/find-reading", async (req, res) => {
         res.setHeader("Content-Type", "application/json");
         res.setHeader("Cache-Control", "s-max-age=1, stale-while-revalidate");
 
-        let orderQuery = sortOrder === "DESC" ? "descending" : "ascending";
-        let offsetQuery = page * rpp;
-
+        let orderQuery = sortOrder;
+        let offsetQuery = (page - 1) * rpp;
         let dateQuery = null;
 
-        if (dateLowerLimit && dateUpperLimit) {
-            dateQuery = `datecreated > ${dateLowerLimit} AND datecreated < ${dateUpperLimit} `;
-        } else if (dateLowerLimit) {
-            dateQuery = `datecreated > ${dateLowerLimit} `;
-        } else if (dateUpperLimit) {
-            dateQuery = `datecreated < ${dateUpperLimit} `;
+        if (dateLowerLimit !== "null" && dateUpperLimit !== "null") {
+            dateQuery = `WHERE datecreated > '${dateLowerLimit}' AND datecreated < '${dateUpperLimit}' `;
+        } else if (dateLowerLimit !== "null") {
+            dateQuery = `WHERE datecreated > '${dateLowerLimit}' `;
+        } else if (dateUpperLimit !== "null") {
+            dateQuery = `WHERE datecreated < '${dateUpperLimit}' `;
         }
 
         const newReading = await pool.query(
             `SELECT *
             FROM public.reading ${
-                dateQuery && "Where " + dateQuery
-            } orderby datecreated ${orderQuery} LIMIT ${rpp} OFFSET ${offsetQuery}`
+                dateQuery !== null ? dateQuery : ""
+            } order by datecreated ${orderQuery} LIMIT ${rpp} OFFSET ${offsetQuery}`
         );
-        res.json(newReading.rows);
+
+        const rowCount = await pool.query(
+            `SELECT Count(*)
+            FROM public.reading ${dateQuery !== null ? dateQuery : ""}`
+        );
+        let count = rowCount.rows;
+        res.json({ values: [...newReading.rows], count });
     } catch (error) {
         console.log(error);
     }
